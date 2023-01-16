@@ -9,29 +9,23 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Treasures = exports.Draw = void 0;
+exports.Doors = exports.Treasures = exports.Draw = void 0;
 var card_1 = require("./card");
 var draw = [
     {
         type: 'equipment',
-        name: 'equipmentA',
-        rank: 2,
         id: '8',
         deck: 'treasure',
         context: 'free'
     },
     {
         type: 'tool',
-        name: 'toolB',
-        rank: 15,
         id: '9',
         deck: 'treasure',
         context: 'skirmish'
     },
     {
         type: 'tool',
-        name: 'toolC',
-        rank: 6,
         id: '10',
         deck: 'treasure',
         context: 'skirmish'
@@ -77,8 +71,43 @@ var Treasures = /** @class */ (function () {
         var _this = this;
         console.log('treasure deck refreshes');
         this.cards = this.stash.cards.filter(function (card) { return card.deck === _this.type; });
-        this.stash.cards = [];
+        this.stash.cards = this.stash.cards.filter(function (card) { return card.deck !== _this.type; });
     };
     return Treasures;
 }());
 exports.Treasures = Treasures;
+var Doors = /** @class */ (function () {
+    function Doors(draw) {
+        var _this = this;
+        this.type = 'door';
+        this.cards = __spreadArray([], card_1.cards.filter(function (card) { return card.deck === _this.type; }), true);
+        this.stash = draw;
+    }
+    Object.defineProperty(Doors.prototype, "length", {
+        get: function () {
+            return this.cards.length;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Doors.prototype.take = function (amount) {
+        var arr = [];
+        for (var i = 0; i < amount; i++) {
+            console.log("draw ".concat(i + 1, " card, total: ").concat(this.length));
+            if (this.length === 0) {
+                this.refresh();
+            }
+            var popped = this.cards.pop();
+            arr.push(popped);
+        }
+        return arr;
+    };
+    Doors.prototype.refresh = function () {
+        var _this = this;
+        console.log('treasure deck refreshes');
+        this.cards = this.stash.cards.filter(function (card) { return card.deck === _this.type; });
+        this.stash.cards = this.stash.cards.filter(function (card) { return card.deck !== _this.type; });
+    };
+    return Doors;
+}());
+exports.Doors = Doors;

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script type="module">
+        const ws = new WebSocket('ws://localhost:8000');
+        let el;
+        ws.addEventListener('message', (event) => {
+            console.log(JSON.parse(event.data))
+            const {tres, doors, cards, stash} = JSON.parse(event.data);
+                let stash_cont = document.getElementById("stashcards");
+                let dcard_cont = document.getElementById("dcards");
+                let tcard_cont = document.getElementById("tcards");
+                let dcards = ``;
+                let tcards = ``;
+                let scards = ``;
+                    for (let index = 0; index < doors; index++) {
+                        dcards += `<div style="background-color: cyan; width: 100px">door</div>`
+                    }  
+                    for (let index = 0; index < tres; index++) {
+                        dcards += `<div style="background-color: tomato; width: 100px">treasure</div>`
+                    }
+                    for (let index = 0; index < stash; index++) {
+                        scards += `<div style="background-color: grey; width: 100px">stash</div>`
+                    }
+                dcard_cont.innerHTML = dcards;
+                tcard_cont.innerHTML = tcards;
+                stash_cont.innerHTML = scards;
+            if (cards) {
+                let hand_cont = document.getElementById('hand');
+                let hand = ``;
+                hand_cont.innerHTML = ``;
+                cards.map((card) => {
+                    let cardEl = document.createElement('div');
+                    cardEl.setAttribute('class', 'player-card');
+                    cardEl.setAttribute('card-id', card.id);
+                    cardEl.addEventListener('click', () => {
+                        hand_cont.innerHTML = ''
+                        ws.send(JSON.stringify({type: 'draw_card', payload: {id: card.id}}))
+                    })
+                    cardEl.append(card.id)
+                    hand_cont.appendChild(cardEl)
+                    // hand += `<div style="background-color: ${card.deck === 'door' ? 'cyan' : 'tomato'}; width: 100px">${card.id}<div>`;
+                })
+                // hand_cont.innerHTML = hand;
+            }
+        })
+        let pick_button = document.getElementById("pick_card");
+        pick_button.addEventListener('click', () => {
+            ws.send(JSON.stringify({type: 'pick'}));
+        })
+    </script>
+    <div>
+        <section id="dcards"></section>
+        <section id="tcards"></section>
+        <section id="stashcards"></section>
+    </div>
+    <button id="pick_card">pick</button>
+    <div id="hand"></div>
+</body>
+</html>

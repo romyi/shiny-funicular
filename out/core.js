@@ -2,33 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_1 = require("crypto");
 const card_1 = require("./card");
+const player_1 = require("./player");
+const stack_1 = require("./stack");
 const prompt = require('prompt-sync')();
 class Pool {
     constructor() {
         this.games = [];
-    }
-}
-class Player {
-    constructor(name) {
-        this.id = (0, crypto_1.randomUUID)();
-        this.name = name;
-        this.cards = [];
-    }
-    cast() {
-        if (this.cards.length === 0)
-            return null;
-        console.log(`cards: ${JSON.stringify(this.cards, null, 2)}`);
-        let prompted = prompt('cast a card: ');
-        let casted = this.cards.find(card => card.id === prompted);
-        if (casted) {
-            let filtered = this.cards.filter(card => card.id !== (casted === null || casted === void 0 ? void 0 : casted.id));
-            this.cards = [...filtered];
-            console.log(`card ${casted === null || casted === void 0 ? void 0 : casted.name} casted`);
-            return casted;
-        }
-        else {
-            return null;
-        }
     }
 }
 class Game {
@@ -36,24 +15,6 @@ class Game {
         this.name = name;
         this.id = (0, crypto_1.randomUUID)();
         pool.games.push(this);
-    }
-}
-class Stack {
-    constructor() {
-        this.iter = 1;
-        this.cards = [];
-    }
-    refresh() {
-        this.iter++;
-        this.cards = [];
-        this.frames = [];
-    }
-    addCard(card) {
-        var _a;
-        if (card.context === 'skirmish') {
-            (_a = this.frames) === null || _a === void 0 ? void 0 : _a.push(card.context);
-        }
-        this.cards.push(card);
     }
 }
 class Core {
@@ -90,14 +51,14 @@ class Core {
     }
     startStack(card) {
         var _a;
-        this.stack = new Stack();
+        this.stack = new stack_1.Stack();
         (_a = this.stack) === null || _a === void 0 ? void 0 : _a.addCard(card);
     }
 }
 const pool = new Pool();
-const alice = new Player("AAA BBB");
-const thomas = new Player("UUU RRR");
-const boris = new Player("XXX ZZZ");
+const alice = new player_1.Player("AAA BBB");
+const thomas = new player_1.Player("UUU RRR");
+const boris = new player_1.Player("XXX ZZZ");
 const game = new Game('game AA BB');
 const core = new Core(game, alice);
 core.players.push(thomas);
