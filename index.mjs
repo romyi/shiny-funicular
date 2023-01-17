@@ -25,7 +25,6 @@ app.get('/game', (req, res) => {
 })
 
 app.get('/players', (req, res) => {
-  console.log(core.players)
   res.send({ players: core.players })
 })
 
@@ -34,6 +33,23 @@ app.get('/deck', (req, res) => {
     stash: draw.cards.length, 
     doors: doors.length, 
     treas: tres.length 
+  })
+})
+
+app.get('/me', (req, res) => {
+  const { name } = req.query;
+  const id = core.players.find((player) => player.name === name).id;
+  res.send({
+    id: id
+  })
+})
+
+app.get('/hand', (req, res) => {
+  const { id } = req.query
+  let hand = []
+  if (id) hand = core.players.find((player) => player.id === id).hand;
+  res.send({
+    cards: hand
   })
 })
 
@@ -50,18 +66,21 @@ const broadcast = (payload) => {
 wss.on("connection", (ws) => {
   const uid = randomUUID();
   clients[uid] = ws;
-  console.log(Object.entries(clients).length);
   ws.on('message', (raw) => {
     const { type, payload, name } = JSON.parse(raw);
     if (type === 'connect') {
       clients[uid].player = new Player(name);
       core.players.push(clients[uid].player);
-      console.log(core.players);
-      broadcast({ entity: 'players' })
+      broadcast({ entity: ['players', 'me'] })
+    }
+    if (type === 'start_match') {
+      for (let player of core.players) {
+        player.inHand([...tres.take(1), ...doors.take(1)])
+      }
+      broadcast({ entity: 'hand' })
     }
   })
   ws.on('close', () => {
-    console.log('closed')
     core.players = core.players.filter((player) => player.id !== clients[uid].player.id);
     broadcast({ entity: 'players' })
     delete clients[uid]
