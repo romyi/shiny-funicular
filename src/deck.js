@@ -11,26 +11,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Doors = exports.Treasures = exports.Draw = void 0;
 var card_1 = require("./card");
-var draw = [
-    {
-        type: 'equipment',
-        id: '8',
-        deck: 'treasure',
-        context: 'free'
-    },
-    {
-        type: 'tool',
-        id: '9',
-        deck: 'treasure',
-        context: 'skirmish'
-    },
-    {
-        type: 'tool',
-        id: '10',
-        deck: 'treasure',
-        context: 'skirmish'
-    }
-];
 var Draw = /** @class */ (function () {
     function Draw() {
         this.cards = [];
