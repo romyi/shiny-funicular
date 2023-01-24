@@ -5,6 +5,7 @@ import { Doors, Draw, Treasures } from "./src/deck.js";
 import { Player } from "./src/player.js";
 import { Game, Core } from "./src/core.js";
 import { randomUUID } from "crypto";
+import { cardlookup, config } from "./src/card_new.js";
 
 const wss = new WebSocketServer({ port: 8000 });
 const clients = {};
@@ -17,7 +18,7 @@ app.use(cors());
 const port = 3000;
 
 const game = new Game("new game");
-const core = new Core(game);
+const core = new Core(game, config);
 
 app.get("/game", (req, res) => {
   res.send({ title: game.name });
@@ -62,22 +63,33 @@ const broadcast = (payload) => {
   });
 };
 
+const address = function(id, payload) {
+  console.log(id)
+  clients[id].send(JSON.stringify(payload))
+}
+
+core.bindask(() => console.log('from card'))
+
 wss.on("connection", (ws) => {
   const uid = randomUUID();
   clients[uid] = ws;
   ws.on("message", (raw) => {
     const { type, payload, name } = JSON.parse(raw);
-    if (type === "connect") {
+    if (type === 'join room') {
       clients[uid].player = new Player(name);
       core.players.push(clients[uid].player);
-      broadcast({ entity: ["players", "me"], script: "startBouncing" });
+      broadcast({ entity: ["players", "me"]});
+      // clients[uid].send({ script: 'invite_to_draft' })
+      address(uid,{ script: 'inviteToDraft' })
+      // core.players.hand.push(core.loots.pop());
+      // cardlookup[core.doors[0].name].mechanics[0].action(core)
     }
-    if (type === "start_match") {
-      for (let player of core.players) {
-        player.inHand([...tres.take(1), ...doors.take(1)]);
-      }
-      broadcast({ entity: "hand" });
-    }
+    // if (type === "start_match") {
+    //   for (let player of core.players) {
+    //     player.inHand([...tres.take(1), ...doors.take(1)]);
+    //   }
+    //   broadcast({ entity: "hand" });
+    // }
   });
   ws.on("close", () => {
     core.players = core.players.filter(
@@ -87,3 +99,17 @@ wss.on("connection", (ws) => {
     delete clients[uid];
   });
 });
+
+//server
+const mike = new Player('Mike')
+core.players.push(mike)
+//client
+console.log(core)
+mike.hand.push(core.loots.pop());
+const activated = core.players[0].hand[0];
+console.log(core)
+//server
+core.stash.push(activated);
+mike.hand = mike.hand.filter((card) => card.id !== activated.id);
+cardlookup[activated.name].mechanics[0].action(core)
+console.log(core)

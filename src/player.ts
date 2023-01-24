@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { Card } from './card';
+import { Card } from './card_new';
 
 export class Player {
     id: string
