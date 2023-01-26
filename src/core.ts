@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { cardlookup, Card, Cardlookup } from './card_new';
+import { cardlookup, Card, BluePrints } from './card_new';
 import { Player } from './player';
 import { Stack } from './stack';
 const prompt = require('prompt-sync')();
@@ -24,13 +24,13 @@ export class Core {
     stash: Card[];
     doors: Card[];
     loots: Card[];
-    ask: () => void
+    ask: (payload: any) => void
     constructor(game: Game, config: Record<string, number>) {
         const loots = [];
         const doors = [];
         for (let [cardname, q] of Object.entries(config)) {
             for (let index = 0; index < q; index++) {
-                const card: (Partial<Cardlookup> & {id: string}) = {...cardlookup[cardname], id: randomUUID()}
+                const card: (Partial<BluePrints> & {id: string}) = {...cardlookup[cardname], id: randomUUID()}
                 delete card.mechanics
                 if (card.type === 'creature' || card.type === 'race') {
                     doors.push(card as Card);
@@ -49,7 +49,7 @@ export class Core {
         this.doors = doors;
         this.stash = [];
     }
-    bindask(fromsoket: () => void) {
+    bindask(fromsoket: (payload: any) => void) {
         this.ask = fromsoket
     }
 }

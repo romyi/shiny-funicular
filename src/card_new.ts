@@ -9,12 +9,18 @@ export interface Card {
     id: string
     name: string
     type: 'creature' | 'race' | 'effect' | 'item'
+    description: string
 }
 
-export interface Cardlookup {
-    name: string
-    type: 'creature' | 'race' | 'effect' | 'item'
-    mechanics: Mechanic[]
+interface CreatureCard extends Card {
+    tier: number
+    reward: number
+}
+
+interface ItemCard extends Card {
+    price: number
+    size?: 'big'
+    hands?: 1 | 2
 }
 
 class Damage implements Mechanic {
@@ -22,7 +28,16 @@ class Damage implements Mechanic {
     action: (core: Core) => void
     constructor() {
         this.action = (core: Core) => {
-            core.ask();
+            core.ask({ script: 'highlight' });
+        }
+    }
+}
+
+class PhaseSwitch implements Mechanic {
+    name = 'phase_switch'
+    action: (core: Core) => void
+    constructor() {
+        this.action = (core: Core) => {
             core.phase = 'skirmish'
         }
     }
@@ -34,25 +49,36 @@ class Kill implements Mechanic {
     constructor() {
         this.action = (core: Core) => {
             console.log(this);
-            core.ask();
+            core.ask({ script: 'yo' });
         }
     }
 }
 
+const switchToSkirmish = new PhaseSwitch();
+const dealDamage = new Damage();
+
 export const config: Record<string, number> = {
-    sword: 2,
-    boobasour: 1
+    sword: 5,
+    boobasour: 5
 }
 
-export const cardlookup: Record<string, Cardlookup> = {
+type CardBluePrint<T> = Omit<T, "id"> & {mechanics: Mechanic[]}
+export type BluePrints = CardBluePrint<CreatureCard> | CardBluePrint<ItemCard>
+
+export const cardlookup: Record<string, BluePrints> = {
     'sword': {
         name: 'sword',
         type: 'item',
-        mechanics: [new Damage()]
+        mechanics: [dealDamage],
+        description: 'aa',
+        price: 100
     },
     'boobasour': {
         name: 'boobasour',
         type: 'creature',
-        mechanics: [new Kill()]
+        mechanics: [switchToSkirmish],
+        tier: 3,
+        reward: 1,
+        description: 'aa'
     }
 }
